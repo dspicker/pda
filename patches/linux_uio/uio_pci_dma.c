@@ -1072,20 +1072,18 @@ uio_pci_dma_free_kernel_memory(struct uio_pci_dma_private *priv)
 static int
 page_fault_handler
 (
-    struct vm_area_struct *vma,
+    /*struct vm_area_struct *vma,*/
     struct vm_fault       *vmf
 )
 {
     UIO_DEBUG_ENTER();
 
-    struct uio_pci_dma_private *priv = vma->vm_private_data;
+    struct uio_pci_dma_private *priv = vmf->vma->vm_private_data;
 
 #ifdef PDA_PFN_T_PAGES
-    int ret = vm_insert_mixed(vma, (unsigned long)vmf->virtual_address,
-                              pfn_to_pfn_t(priv->pfn_list[vmf->pgoff % priv->pages]));
+    int ret = vm_insert_mixed(vmf->vma, (unsigned long)vmf->address, pfn_to_pfn_t(priv->pfn_list[vmf->pgoff % priv->pages]));
 #else
-    int ret = vm_insert_mixed(vma, (unsigned long)vmf->virtual_address,
-                              priv->pfn_list[vmf->pgoff % priv->pages]);
+    int ret = vm_insert_mixed(vmf->vma, (unsigned long)vmf->virtual_address, priv->pfn_list[vmf->pgoff % priv->pages]);
 #endif
 
     switch(ret)
